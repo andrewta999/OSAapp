@@ -1,9 +1,12 @@
 from flask import Flask
-from flask import render_template, jsonify
+from flask import render_template, jsonify, request
 import requests
+import json
+from os import path
 
 app = Flask(__name__)
 URL="http://flaskosa.herokuapp.com/cmd/"
+TIMEOUT=5
 
 #main page
 @app.route('/')
@@ -13,15 +16,22 @@ def hello():
 #return device identification string
 @app.route('/api/IDN')
 def idn():
-    r = requests.get(URL + "IDN")
-    return parseString(r.text)
+    try:
+        r = requests.get(URL + "IDN", timeout=TIMEOUT)
+        return parseString(r.text)
+    except:
+        return "SERVER TIMEOUT"
 
 #return limit
 @app.route('/api/LIM')
 def lim():
-    r = requests.get(URL + "LIM")
-    res = parseString(r.text)
-    if res == "error":
+    try:
+        r = requests.get(URL + "LIM", timeout=TIMEOUT)
+        res = parseString(r.text)
+    except:
+        return "SERVER TIMEOUT"
+
+    if res == "ERROR":
         return res
     else:
         res = res[1:-1]
@@ -32,54 +42,111 @@ def lim():
 #send query
 @app.route('/api/ECHO/<query>')
 def echo(query):
-    r = requests.get(URL + "ECHO/" + query)
+    try:
+        r = requests.get(URL + "ECHO/" + query, timeout=TIMEOUT)
+    except:
+        return "SERVER TIMEOUT"
     return parseString(r.text)
 
 #ping pong
 @app.route('/api/PING')
 def pingPong():
-    r = requests.get(URL + "PING")
+    try:    
+        r = requests.get(URL + "PING", timeout=TIMEOUT)
+    except:
+        return "SERVER TIMEOUT"
     return parseString(r.text)
 
 #start the instrument
 @app.route('/api/START')
 def start():
-    r = requests.get(URL + "START")
+    try:
+        r = requests.get(URL + "START", timeout=TIMEOUT)
+    except:
+        return "SERVER TIMEOUT"
     return parseString(r.text)
 
 #stop the instrument
 @app.route('/api/STOP')
 def stop():
-    r = requests.get(URL + "STOP")
+    try:
+        r = requests.get(URL + "STOP", timeout=TIMEOUT)
+    except:
+        return "SERVER TIMEOUT"
     return parseString(r.text)
 
 #start a scanning
 @app.route('/api/SINGLE')
 def single():
-    r = requests.get(URL + "SINGLE")
+    try:
+        r = requests.get(URL + "SINGLE", timeout=10)
+    except:
+        return "SERVER TIMEOUT"
     return parseString(r.text)
 
 #return the state of the instrument
 @app.route('/api/STATE')
 def state():
-    r = requests.get(URL + "STATE")
+    try:
+        r = requests.get(URL + "STATE", timeout=TIMEOUT)
+    except:
+        return "SERVER TIMEOUT"
     return parseString(r.text)
 
 #get trace
 @app.route('/api/TRACE')
 def trace():
-    r = requests.get(URL + "TRACE")
+    try:
+        r = requests.get(URL + "TRACE", timeout=TIMEOUT)
+    except:
+        return jsonify(error="SERVER TIMEOUT")
+
     try:
         r = r.json()
         return r
     except:
-        return jsonify(error="Error")
+        return jsonify(error="ERROR")
+
+#send query
+@app.route('/api/QUERY')
+def query():
+    queryInput = request.args["queryInput"]
+    r = requests.get("http://flaskosa.herokuapp.com" + queryInput)
+    try:
+        res = r.text 
+        return res 
+    except:
+        pass
+
+    try: 
+        res = r.json()
+        return r
+    except:
+        return jsonify(error="ERROR")
+
+@app.route('/api/UPLOAD', methods=['POST'])
+def upload():
+    graph = jsonify(error="data")
+    with open('graph.txt', 'w') as outfile:
+        json.dump(graph, outfile)
+    return "Successfully Saved File"
+
+@app.route('/api/GET')
+def get():
+    if path.exists('graph.txt'):
+        with open('graph.txt') as json_file:
+            data = json.load(json_file)
+            return data
+    else:
+        return jsonify(error="NO GRAPH AVAILABLE")
+
+
 
 #parse the result
 def parseString(s):
     cs = "+READY>"
     if len(s) <= 7 or s[:7] != cs:
-        return "error"
+        return "ERROR"
     else:
         return s[7:]
 

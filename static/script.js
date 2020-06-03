@@ -26,47 +26,82 @@ $('#single').click(function () {
     getTrace();
 })
 
+$("#queryButton").click(function (event) {
+    event.preventDefault();
+    let query = $("#inputQuery").val();
+    if (query === "" || query === undefined || query === null) {
+        $("#result").text("Invalid Command");
+    } else {
+        $.get("/api/QUERY", { "queryInput": query }, function (response) {
+            $("#result").text(JSON.stringify(response));
+        }, "json");
+    }
+})
+
+$("#save").click(function () {
+    if (data !== undefined) {
+        data["xmin"] = xmin;
+        data["xmax"] = xmax;
+        $.post("/api/UPLOAD", data, function(response){
+            alert(response);
+        })
+    } else {
+        alert("No data available");
+    }
+})
+
 function infiniteTrace() {
-    if(!flag) return;
+    if (!flag) return;
     $.get("/api/LIM", function (response) {
-        let res = response.split(" ");
-        xmin = parseInt(res[0], 10) * Math.pow(10, -9);
-        xmax = parseInt(res[1], 10) * Math.pow(10, -9);
-        $.get("/api/TRACE", function (response) {
-            data = response;
-            plotData();
-            $.get("/api/STATE", function (response) {
-                createLog(response);
-                infiniteTrace();
-            })
-        });
+        if (response.localeCompare("Error") !== 0 && response.localeCompare("SERVER TIMEOUT") !== 0) {
+            let res = response.split(" ");
+            xmin = parseInt(res[0], 10) * Math.pow(10, -9);
+            xmax = parseInt(res[1], 10) * Math.pow(10, -9);
+            $.get("/api/TRACE", function (response) {
+                if (response['error'] === undefined) {
+                    data = response;
+                    plotData();
+                    $.get("/api/STATE", function (response) {
+                        createLog(response);
+                        infiniteTrace();
+                    })
+                } else {
+                    createLog(response['error']);
+                    infiniteTrace();
+                }
+            });
+        } else {
+            createLog(response);
+            infiniteTrace();
+        }
     });
 }
 
 function getTrace() {
-    console.log("Get Trace")
+    $.get("/api/SINGLE", function (response) {
+        createLog(response);
+    });
     $.get("/api/LIM", function (response) {
-        let res = response.split(" ");
-        xmin = parseInt(res[0], 10) * Math.pow(10, -9);
-        xmax = parseInt(res[1], 10) * Math.pow(10, -9);
-        getData();
+        if (response.localeCompare("ERROR") !== 0) {
+            let res = response.split(" ");
+            xmin = parseInt(res[0], 10) * Math.pow(10, -9);
+            xmax = parseInt(res[1], 10) * Math.pow(10, -9);
+            getData();
+        }else{
+            createLog(response);
+        }
     });
 }
 
 function getData() {
     $.get("/api/TRACE", function (response) {
-        if(response["error"] == undefined){
+        if (response["error"] === undefined) {
             data = response;
             plotData();
-            getState();
+        }else{
+            createLog(response["error"]);
         }
     });
-}
-
-function getState() {
-    $.get("/api/STATE", function (response) {
-        createLog(response);
-    })
 }
 
 function createLog(response) {
@@ -92,7 +127,16 @@ function plotData() {
     let points = [trace];
 
     let layout = {
-        title: "Basic OSA trace"
+        title: "OSA trace",
+        yaxis: {
+            title: data["ylabel"] + " (" + data["yunits"] + ")",
+            autorange: true
+        },
+        xaxis: {
+            //range: [xmin, xmax],
+            autorange: true,
+            title: data["xlabel"] + " (" + data["xunits"] + ")"
+        }
     }
 
     Plotly.newPlot('graph', points, layout);
