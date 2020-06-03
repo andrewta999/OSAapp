@@ -6,7 +6,7 @@ from os import path
 
 app = Flask(__name__)
 URL="http://flaskosa.herokuapp.com/cmd/"
-TIMEOUT=5
+TIMEOUT=5 #timeout parameter (in second)
 
 #main page
 @app.route('/')
@@ -124,6 +124,7 @@ def query():
     except:
         return jsonify(error="ERROR")
 
+#in progress, upload and get graph data 
 @app.route('/api/UPLOAD', methods=['POST'])
 def upload():
     graph = jsonify(error="data")
@@ -131,6 +132,7 @@ def upload():
         json.dump(graph, outfile)
     return "Successfully Saved File"
 
+#work in progress
 @app.route('/api/GET')
 def get():
     if path.exists('graph.txt'):
@@ -140,9 +142,8 @@ def get():
     else:
         return jsonify(error="NO GRAPH AVAILABLE")
 
-
-
 #parse the result
+#return error if data is not valid (example: random string)
 def parseString(s):
     cs = "+READY>"
     if len(s) <= 7 or s[:7] != cs:

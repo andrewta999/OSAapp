@@ -1,12 +1,13 @@
-let xmin = undefined
-let xmax = undefined
+let xmin = undefined //min value of x
+let xmax = undefined //max value of x
 let log = {} //log the state of the instruments
-let idn = ""
-let data = undefined
-let flag = false
+let idn = "" //device id 
+let data = undefined //graph data
+let flag = false 
 
-plotVoid();
+plotVoid(); //plot a blank graph at the beginning
 
+//handle event of clicking start button
 $("#start").click(function () {
     $.get("/api/START", function (response) {
         createLog(response);
@@ -15,6 +16,7 @@ $("#start").click(function () {
     })
 });
 
+//handle event of clicking stop button
 $("#stop").click(function () {
     $.get("/api/STOP", function (response) {
         createLog(response);
@@ -22,10 +24,12 @@ $("#stop").click(function () {
     })
 })
 
+//handle event of clicking single button
 $('#single').click(function () {
     getTrace();
 })
 
+//handle event of submitting query form
 $("#queryButton").click(function (event) {
     event.preventDefault();
     let query = $("#inputQuery").val();
@@ -38,6 +42,7 @@ $("#queryButton").click(function (event) {
     }
 })
 
+//handle event of saving graph to the server (in progress)
 $("#save").click(function () {
     if (data !== undefined) {
         data["xmin"] = xmin;
@@ -50,17 +55,23 @@ $("#save").click(function () {
     }
 })
 
+//function to implement start behavior
 function infiniteTrace() {
     if (!flag) return;
+    //get limit fist
     $.get("/api/LIM", function (response) {
         if (response.localeCompare("Error") !== 0 && response.localeCompare("SERVER TIMEOUT") !== 0) {
+            //if limit is valid
             let res = response.split(" ");
             xmin = parseInt(res[0], 10) * Math.pow(10, -9);
             xmax = parseInt(res[1], 10) * Math.pow(10, -9);
+            //get a single trace data
             $.get("/api/TRACE", function (response) {
                 if (response['error'] === undefined) {
+                    //if data is valid, plot data
                     data = response;
                     plotData();
+                    //get the state of the instrument
                     $.get("/api/STATE", function (response) {
                         createLog(response);
                         infiniteTrace();
@@ -77,10 +88,13 @@ function infiniteTrace() {
     });
 }
 
+//get a single trace data
 function getTrace() {
+    //start scanning (blocking behavior)
     $.get("/api/SINGLE", function (response) {
         createLog(response);
     });
+    //get limit and graph data
     $.get("/api/LIM", function (response) {
         if (response.localeCompare("ERROR") !== 0) {
             let res = response.split(" ");
@@ -93,6 +107,7 @@ function getTrace() {
     });
 }
 
+//get graph data
 function getData() {
     $.get("/api/TRACE", function (response) {
         if (response["error"] === undefined) {
@@ -104,6 +119,7 @@ function getData() {
     });
 }
 
+//generate log
 function createLog(response) {
     let today = new Date();
     let date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
@@ -114,6 +130,7 @@ function createLog(response) {
     $('#log').append(res);
 }
 
+//plot the data
 function plotData() {
     let trace = {
         type: "scatter",
@@ -142,6 +159,7 @@ function plotData() {
     Plotly.newPlot('graph', points, layout);
 }
 
+//plot a blank graph
 function plotVoid() {
     let trace1 = {
         x: [],
