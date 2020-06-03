@@ -38,7 +38,7 @@ $("#queryButton").click(function (event) {
     } else {
         $.get("/api/QUERY", { "queryInput": query }, function (response) {
             $("#result").text(JSON.stringify(response));
-        }, "json");
+        });
     }
 })
 
