@@ -8,7 +8,7 @@ A full-stack web app that retrieves and displays data from an OSA instrument
 4. Run query by typing query in the input field and hit submit
 5. Zoom, pan the plot, and read data from the plot
 6. Read log generate by the system
-7. Plot persistence (in progress)
+7. Plot persistence (work in progress)
 
 # Installation
 1. Clone the repository and go to the root of the cloned repo.
@@ -22,7 +22,7 @@ A full-stack web app that retrieves and displays data from an OSA instrument
 3. For clean installation, create a python virtual environment in this directory and activate it.
    Link for instruction on how to create a virtual envinronment in Python (https://docs.python.org/3/library/venv.html)
 
-4. Run this command to install all the Python dependencies needed for this project (you can skip step 3 if you want).
+4. Run this command to install all the Python dependencies needed for this project (you can skip step 4 if you want).
 
    **pip install -r requirements.txt**
 
