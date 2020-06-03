@@ -43,17 +43,17 @@ $("#queryButton").click(function (event) {
 })
 
 //handle event of saving graph to the server (in progress)
-$("#save").click(function () {
-    if (data !== undefined) {
-        data["xmin"] = xmin;
-        data["xmax"] = xmax;
-        $.post("/api/UPLOAD", data, function(response){
-            alert(response);
-        })
-    } else {
-        alert("No data available");
-    }
-})
+// $("#save").click(function () {
+//     if (data !== undefined) {
+//         data["xmin"] = xmin;
+//         data["xmax"] = xmax;
+//         $.post("/api/UPLOAD", data, function(response){
+//             alert(response);
+//         })
+//     } else {
+//         alert("No data available");
+//     }
+// })
 
 //function to implement start behavior
 function infiniteTrace() {
