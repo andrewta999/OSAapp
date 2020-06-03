@@ -22,7 +22,7 @@ A full-stack web app that retrieves and displays data from an OSA instrument
 3. For clean installation, create a python virtual environment in this directory and activate it.
    Link for instruction on how to create a virtual envinronment in Python (https://docs.python.org/3/library/venv.html)
 
-4. Run this command to install all the Python dependencies needed for this project.
+4. Run this command to install all the Python dependencies needed for this project (you can skip step 3 if you want).
 
    **pip install -r requirements.txt**
 
@@ -33,5 +33,10 @@ A full-stack web app that retrieves and displays data from an OSA instrument
 6. The app is live at http://localhost:5000. Open your browser and visit this URL.
 
 # Deployment
+The app is deployed to heroku cloud. Visit this link for a quick demo
+https://osa-app.herokuapp.com/
 
 # Demo Picture 
+Here are some demo pictures.
+
+![Demo1](https://github.com/andrewta999/OSAapp/blob/master/photo/d1.png)
